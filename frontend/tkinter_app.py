@@ -2,6 +2,8 @@ import tkinter as tk
 from tkinter import messagebox
 
 from state import app_data
+from state import number_data
+from state import name_data
 
 try:
     from .api_client import add_numbers, combine_name
@@ -23,23 +25,23 @@ def show_add_page(root):
     tk.Label(root, text="A").pack()
     entry_a = tk.Entry(root)
     entry_a.pack()
-    entry_a.insert(0, app_data["a"])
+    entry_a.insert(0, number_data["a"])
 
     tk.Label(root, text="B").pack()
     entry_b = tk.Entry(root)
     entry_b.pack()
-    entry_b.insert(0, app_data["b"])
+    entry_b.insert(0, number_data["b"])
 
     result_label = tk.Label(root, text="Result:")
     result_label.pack()
 
     def calculate():
         try:
-            app_data["a"] = entry_a.get().strip()
-            app_data["b"] = entry_b.get().strip()
+            number_data["a"] = entry_a.get().strip()
+            number_data["b"] = entry_b.get().strip()
 
-            a = int(app_data["a"])
-            b = int(app_data["b"])
+            a = int(number_data["a"])
+            b = int(number_data["b"])
 
             result = add_numbers(a, b)
             result_label.config(text=f"Result: {result['result']}")
@@ -50,8 +52,8 @@ def show_add_page(root):
             result_label.config(text=f"Error: {e}")
 
     def next_page():
-        app_data["a"] = entry_a.get().strip()
-        app_data["b"] = entry_b.get().strip()
+        number_data["a"] = entry_a.get().strip()
+        number_data["b"] = entry_b.get().strip()
         show_first_name_page(root)
 
     tk.Button(root, text="Add", command=calculate).pack()
@@ -68,12 +70,12 @@ def show_first_name_page(root):
     tk.Label(root, text="Enter first name").pack()
     first_name_entry = tk.Entry(root)
     first_name_entry.pack()
-    first_name_entry.insert(0, app_data["first_name"])
+    first_name_entry.insert(0, name_data["first_name"])
 
     def next_page():
-        app_data["first_name"] = first_name_entry.get().strip()
+        name_data["first_name"] = first_name_entry.get().strip()
 
-        if not app_data["first_name"]:
+        if not name_data["first_name"]:
             messagebox.showerror("Input Error", "Enter a first name")
             return
 
@@ -88,27 +90,27 @@ def show_last_name_page(root):
     clear_window(root)
 
     tk.Label(root, text="Last Name Page").pack()
-    tk.Label(root, text=f"First Name: {app_data['first_name']}").pack()
+    tk.Label(root, text=f"First Name: {name_data['first_name']}").pack()
 
     tk.Label(root, text="Enter last name").pack()
     last_name_entry = tk.Entry(root)
     last_name_entry.pack()
-    last_name_entry.insert(0, app_data["last_name"])
+    last_name_entry.insert(0, name_data["last_name"])
 
     result_label = tk.Label(root, text="Full Name:")
     result_label.pack()
 
     def submit_name():
-        app_data["last_name"] = last_name_entry.get().strip()
+        name_data["last_name"] = last_name_entry.get().strip()
 
-        if not app_data["last_name"]:
+        if not name_data["last_name"]:
             messagebox.showerror("Input Error", "Enter a last name")
             return
 
         try:
             result = combine_name(
-                app_data["first_name"],
-                app_data["last_name"]
+                name_data["first_name"],
+                name_data["last_name"]
             )
 
             full_name = result.get("full_name") or result.get("result")
