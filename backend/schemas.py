@@ -9,7 +9,7 @@ class Result(BaseModel):
     result: int
 
 
-# Fist name and Last name and return the full name
+# First name and Last name and return the full name from different pages 
 class NameInput(BaseModel):
     first_name: str
     last_name: str
