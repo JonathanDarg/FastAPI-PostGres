@@ -1,7 +1,9 @@
 import tkinter as tk
 from tkinter import messagebox
 
+from api_client import save_session
 from state import name_data
+from state import number_data
 
 
 class LastNamePage(tk.Frame):
@@ -41,4 +43,19 @@ class LastNamePage(tk.Frame):
             return
 
         name_data["last_name"] = last_name
-        self.controller.show_page("Results")
+        
+        try:
+            save_session(
+                number_data["a"],
+                number_data["b"],
+                name_data["first_name"],
+                name_data["last_name"]
+            )
+
+            self.controller.show_page("Results")
+
+        except Exception as e:
+            messagebox.showerror(
+                "Save Error",
+                f"Failed to save session:\n{e}"
+            )

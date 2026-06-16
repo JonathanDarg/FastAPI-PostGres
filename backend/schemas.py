@@ -1,3 +1,4 @@
+from datetime import datetime
 from pydantic import BaseModel
 
 # Add two numbers and return the result
@@ -16,3 +17,28 @@ class NameInput(BaseModel):
 
 class NameResult(BaseModel):
     full_name: str
+
+
+# Combine all the inputs and results into a session
+class SessionCreate(BaseModel):
+    a: int
+    b: int
+    first_name: str
+    last_name: str
+
+
+class SessionOut(BaseModel):
+    id: int
+
+    a: int
+    b: int
+    result: int
+
+    first_name: str
+    last_name: str
+    full_name: str
+
+    created_at: datetime
+
+    class Config:
+        from_attributes = True

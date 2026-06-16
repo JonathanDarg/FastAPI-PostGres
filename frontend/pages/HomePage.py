@@ -42,23 +42,34 @@ class HomePage(tk.Frame):
             "cursor": "hand2"
         }
 
-        tk.Button(
+        self.btn_start = tk.Button(
             self.right_frame,
             text="Start",
             command=lambda: controller.show_page("Add"),
             **button_options
-        ).pack(pady=10)
+        )
+        self.btn_start.pack(pady=10)
 
-        tk.Button(
+        self.btn_results = tk.Button(
             self.right_frame,
             text="Results",
             command=lambda: controller.show_page("Results"),
             **button_options
-        ).pack(pady=10)
+        )
+        self.btn_results.pack(pady=10)
 
-        tk.Button(
+        self.btn_history = tk.Button(
+            self.right_frame,
+            text="History",
+            command=lambda: controller.show_page("History"),
+            **button_options
+        )
+        self.btn_history.pack(pady=10)
+
+        self.btn_quit = tk.Button(
             self.right_frame,
             text="Quit",
             command=self.controller.quit,
             **button_options
-        ).pack(pady=10)
+        )
+        self.btn_quit.pack(pady=10)
