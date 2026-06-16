@@ -6,6 +6,7 @@ from pages.FirstNamePage import FirstNamePage
 from pages.LastNamePage import LastNamePage
 from pages.ResultsPage import ResultsPage
 from pages.HistoryPage import HistoryPage
+from pages.ConfigPage import ConfigPage
 
 
 class App(tk.Tk):
@@ -30,6 +31,7 @@ class App(tk.Tk):
             (LastNamePage, "LastName"),
             (ResultsPage, "Results"),
             (HistoryPage, "History"),
+            (ConfigPage, "Config")
         ]:
             page = PageClass(container, self)
             self.pages[name] = page

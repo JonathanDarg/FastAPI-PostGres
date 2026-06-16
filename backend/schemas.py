@@ -26,7 +26,7 @@ class SessionCreate(BaseModel):
     first_name: str
     last_name: str
 
-
+#----------------------------------------------------------------
 class SessionOut(BaseModel):
     id: int
 
@@ -42,3 +42,37 @@ class SessionOut(BaseModel):
 
     class Config:
         from_attributes = True
+
+#----------------------------------------------------------------
+class SavedConfigCreate(BaseModel):
+    config_name: str
+    a: int
+    b: int
+    first_name: str
+    last_name: str
+
+
+class SavedConfigOut(BaseModel):
+    id: int
+    config_name: str
+
+    a: int
+    b: int
+    result: int
+
+    first_name: str
+    last_name: str
+    full_name: str
+
+    order_index: int
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class ReorderConfig(BaseModel):
+    config_id: int
+    direction: str
+
+#----------------------------------------------------------------

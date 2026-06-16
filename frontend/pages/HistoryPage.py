@@ -1,11 +1,10 @@
 import tkinter as tk
+from tkinter import simpledialog, messagebox
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
-try:
-    from api_client import get_recent_sessions
-except ImportError:
-    from ..api_client import get_recent_sessions
+from state import number_data, name_data
+from api_client import get_recent_sessions, save_config
 
 
 class HistoryPage(tk.Frame):
@@ -32,6 +31,14 @@ class HistoryPage(tk.Frame):
 
         self.list_frame = tk.Frame(self.left_frame, bg="white")
         self.list_frame.pack(fill="both", expand=True, pady=10)
+
+        tk.Button(
+            self.left_frame,
+            text="Save Config",
+            command=self.save_current_config,
+            font=("Arial", 12),
+            width=12
+        ).pack(side="bottom", pady=10)
 
         self.right_frame = tk.Frame(self, bg="white")
         self.right_frame.grid(row=0, column=1, sticky="nsew", padx=20, pady=10)
@@ -85,11 +92,9 @@ class HistoryPage(tk.Frame):
             return
 
         for session in self.sessions:
-            display_name = f"Session {session.get('id', 'N/A')}"
-
             item = tk.Label(
                 self.list_frame,
-                text=f"→ {display_name}",
+                text=f"→ Session {session.get('id', 'N/A')}",
                 anchor="w",
                 padx=10,
                 pady=8,
@@ -130,11 +135,14 @@ class HistoryPage(tk.Frame):
         created_at = session.get("created_at", "N/A")
 
         if created_at != "N/A":
-            created_at = (
-                datetime.fromisoformat(created_at.replace("Z", "+00:00"))
-                .astimezone(ZoneInfo("America/New_York"))
-                .strftime("%m-%d-%Y %I:%M %p")
-        )
+            try:
+                created_at = (
+                    datetime.fromisoformat(created_at.replace("Z", "+00:00"))
+                    .astimezone(ZoneInfo("America/New_York"))
+                    .strftime("%Y-%m-%d %I:%M %p")
+                )
+            except Exception:
+                created_at = created_at[:16].replace("T", " ")
 
         return "\n".join([
             f"Session ID: {session.get('id', 'N/A')}",
@@ -148,3 +156,26 @@ class HistoryPage(tk.Frame):
             f"Last Name: {session.get('last_name', 'N/A')}",
             f"Full Name: {session.get('full_name', 'N/A')}",
         ])
+
+    def save_current_config(self):
+        config_name = simpledialog.askstring(
+            "Save Config",
+            "Enter config name:"
+        )
+
+        if not config_name:
+            return
+
+        try:
+            save_config(
+                config_name,
+                int(number_data["a"]),
+                int(number_data["b"]),
+                name_data["first_name"],
+                name_data["last_name"]
+            )
+
+            messagebox.showinfo("Saved", "Config saved successfully.")
+
+        except Exception as e:
+            messagebox.showerror("Save Error", str(e))

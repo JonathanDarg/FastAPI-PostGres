@@ -28,7 +28,7 @@ class HomePage(tk.Frame):
             bg="white",
             fg="#333333"
         )
-        self.question_label.pack(pady=(80, 20))
+        self.question_label.pack(pady=(60, 20))
 
         button_options = {
             "font": ("Arial", 12),
@@ -49,6 +49,14 @@ class HomePage(tk.Frame):
             **button_options
         )
         self.btn_start.pack(pady=10)
+
+        self.btn_old = tk.Button(
+            self.right_frame,
+            text="use old\nconfiguration",
+            command=lambda: controller.show_page("Config"),
+            **button_options
+        )
+        self.btn_old.pack(pady=10)
 
         self.btn_results = tk.Button(
             self.right_frame,

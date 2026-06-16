@@ -54,3 +54,41 @@ def get_recent_sessions():
 
     response.raise_for_status()
     return response.json()
+
+#---------------------------------------------------
+def save_config(config_name, a, b, first_name, last_name):
+    response = requests.post(
+        f"{BASE_URL}/configs",
+        json={
+            "config_name": config_name,
+            "a": a,
+            "b": b,
+            "first_name": first_name,
+            "last_name": last_name
+        },
+        timeout=5
+    )
+    response.raise_for_status()
+    return response.json()
+
+
+def get_configs():
+    response = requests.get(
+        f"{BASE_URL}/configs",
+        timeout=5
+    )
+    response.raise_for_status()
+    return response.json()
+
+
+def reorder_config(config_id, direction):
+    response = requests.post(
+        f"{BASE_URL}/configs/reorder",
+        json={
+            "config_id": config_id,
+            "direction": direction
+        },
+        timeout=5
+    )
+    response.raise_for_status()
+    return response.json()
