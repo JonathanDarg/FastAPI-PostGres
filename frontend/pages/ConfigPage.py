@@ -15,7 +15,6 @@ class ConfigPage(tk.Frame):
         self.configs = []
         self.selected_config = None
         self.selected_label = None
-
         self.drag_start_index = None
         self.drag_current_label = None
 
@@ -38,11 +37,11 @@ class ConfigPage(tk.Frame):
 
         tk.Button(
             self.left_frame,
-            text="Use Config",
-            command=self.use_selected_config,
+            text="Autofill",
+            command=self.autofill_selected_config,
             font=("Arial", 12),
             width=12
-        ).pack(side="bottom", pady=10)
+        ).pack(side="bottom", pady=5)
 
         self.right_frame = tk.Frame(self, bg="white")
         self.right_frame.grid(row=0, column=1, sticky="nsew", padx=20, pady=10)
@@ -114,17 +113,16 @@ class ConfigPage(tk.Frame):
             )
             item.pack(fill="x")
 
-            item.config(
-                borderwidth=1,
-                relief="flat"
+            item.bind(
+                "<Button-1>",
+                lambda e, c=config, i=index: self.select_config(e, c, i)
             )
-
-            item.bind("<Button-1>", lambda e, c=config, i=index: self.select_config(e, c, i))
             item.bind("<B1-Motion>", self.drag_motion)
             item.bind("<ButtonRelease-1>", self.drop_config)
 
-            separator = tk.Frame(self.list_frame, height=1, bg="#ccc")
-            separator.pack(fill="x", padx=5, pady=2)
+            tk.Frame(self.list_frame, height=1, bg="#ccc").pack(
+                fill="x", padx=5, pady=2
+            )
 
     def select_config(self, event, config, index):
         self.selected_config = config
@@ -140,10 +138,8 @@ class ConfigPage(tk.Frame):
         self.show_preview(config)
 
     def drag_motion(self, event):
-        if not self.drag_current_label:
-            return
-
-        self.drag_current_label.config(bg="#cce5ff")
+        if self.drag_current_label:
+            self.drag_current_label.config(bg="#cce5ff")
 
     def drop_config(self, event):
         if self.drag_start_index is None:
@@ -159,17 +155,16 @@ class ConfigPage(tk.Frame):
         drop_index = self.drag_start_index
 
         for index, label in enumerate(labels):
-            label_top = label.winfo_rooty()
-            label_bottom = label_top + label.winfo_height()
+            top = label.winfo_rooty()
+            bottom = top + label.winfo_height()
 
-            if label_top <= mouse_y <= label_bottom:
+            if top <= mouse_y <= bottom:
                 drop_index = index
                 break
 
         if drop_index != self.drag_start_index:
             moved_config = self.configs.pop(self.drag_start_index)
             self.configs.insert(drop_index, moved_config)
-
             self.save_new_order()
 
         self.drag_start_index = None
@@ -220,7 +215,7 @@ class ConfigPage(tk.Frame):
             f"Full Name: {config.get('full_name', 'N/A')}",
         ])
 
-    def use_selected_config(self):
+    def autofill_selected_config(self):
         if not self.selected_config:
             messagebox.showerror("Selection Error", "Select a config first.")
             return
@@ -231,4 +226,7 @@ class ConfigPage(tk.Frame):
         name_data["first_name"] = self.selected_config["first_name"]
         name_data["last_name"] = self.selected_config["last_name"]
 
+        messagebox.showinfo("Autofilled", "Config loaded into the form fields.")
         self.controller.show_page("Results")
+
+    

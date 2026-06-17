@@ -59,3 +59,7 @@ class LastNamePage(tk.Frame):
                 "Save Error",
                 f"Failed to save session:\n{e}"
             )
+    
+    def refresh(self):
+        self.last_name_entry.delete(0, tk.END)
+        self.last_name_entry.insert(0, name_data["last_name"])

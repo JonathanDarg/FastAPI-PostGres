@@ -47,3 +47,10 @@ class AddPage(tk.Frame):
 
         except ValueError:
             messagebox.showerror("Input Error", "Enter valid integers")
+
+    def refresh(self):
+        self.entry_a.delete(0, tk.END)
+        self.entry_a.insert(0, str(number_data["a"]))
+
+        self.entry_b.delete(0, tk.END)
+        self.entry_b.insert(0, str(number_data["b"]))
