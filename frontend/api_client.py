@@ -81,14 +81,12 @@ def get_configs():
     return response.json()
 
 
-def reorder_config(config_id, direction):
+def reorder_configs(config_ids):
     response = requests.post(
         f"{BASE_URL}/configs/reorder",
-        json={
-            "config_id": config_id,
-            "direction": direction
-        },
+        json=config_ids,
         timeout=5
     )
+
     response.raise_for_status()
     return response.json()

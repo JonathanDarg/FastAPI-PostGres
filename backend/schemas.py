@@ -70,9 +70,4 @@ class SavedConfigOut(BaseModel):
     class Config:
         from_attributes = True
 
-
-class ReorderConfig(BaseModel):
-    config_id: int
-    direction: str
-
 #----------------------------------------------------------------

@@ -4,7 +4,7 @@ from datetime import datetime
 from zoneinfo import ZoneInfo
 
 from state import number_data, name_data
-from api_client import get_configs, reorder_config
+from api_client import get_configs, reorder_configs
 
 
 class ConfigPage(tk.Frame):
@@ -15,6 +15,9 @@ class ConfigPage(tk.Frame):
         self.configs = []
         self.selected_config = None
         self.selected_label = None
+
+        self.drag_start_index = None
+        self.drag_current_label = None
 
         self.grid_columnconfigure(1, weight=1)
         self.grid_rowconfigure(0, weight=1)
@@ -35,27 +38,11 @@ class ConfigPage(tk.Frame):
 
         tk.Button(
             self.left_frame,
-            text="Move Up",
-            command=lambda: self.move_selected("up"),
-            font=("Arial", 12),
-            width=12
-        ).pack(pady=5)
-
-        tk.Button(
-            self.left_frame,
-            text="Move Down",
-            command=lambda: self.move_selected("down"),
-            font=("Arial", 12),
-            width=12
-        ).pack(pady=5)
-
-        tk.Button(
-            self.left_frame,
             text="Use Config",
             command=self.use_selected_config,
             font=("Arial", 12),
             width=12
-        ).pack(pady=5)
+        ).pack(side="bottom", pady=10)
 
         self.right_frame = tk.Frame(self, bg="white")
         self.right_frame.grid(row=0, column=1, sticky="nsew", padx=20, pady=10)
@@ -108,7 +95,13 @@ class ConfigPage(tk.Frame):
             ).pack()
             return
 
-        for config in self.configs:
+        self.render_config_list()
+
+    def render_config_list(self):
+        for widget in self.list_frame.winfo_children():
+            widget.destroy()
+
+        for index, config in enumerate(self.configs):
             item = tk.Label(
                 self.list_frame,
                 text=f"→ {config.get('config_name', 'Unnamed')}",
@@ -121,14 +114,22 @@ class ConfigPage(tk.Frame):
             )
             item.pack(fill="x")
 
-            item.bind("<Button-1>", lambda e, c=config: self.select_config(e, c))
-
-            tk.Frame(self.list_frame, height=1, bg="#ccc").pack(
-                fill="x", padx=5, pady=2
+            item.config(
+                borderwidth=1,
+                relief="flat"
             )
 
-    def select_config(self, event, config):
+            item.bind("<Button-1>", lambda e, c=config, i=index: self.select_config(e, c, i))
+            item.bind("<B1-Motion>", self.drag_motion)
+            item.bind("<ButtonRelease-1>", self.drop_config)
+
+            separator = tk.Frame(self.list_frame, height=1, bg="#ccc")
+            separator.pack(fill="x", padx=5, pady=2)
+
+    def select_config(self, event, config, index):
         self.selected_config = config
+        self.drag_start_index = index
+        self.drag_current_label = event.widget
 
         if self.selected_label and self.selected_label.winfo_exists():
             self.selected_label.config(bg="white")
@@ -137,6 +138,51 @@ class ConfigPage(tk.Frame):
         self.selected_label.config(bg="#e0e0e0")
 
         self.show_preview(config)
+
+    def drag_motion(self, event):
+        if not self.drag_current_label:
+            return
+
+        self.drag_current_label.config(bg="#cce5ff")
+
+    def drop_config(self, event):
+        if self.drag_start_index is None:
+            return
+
+        mouse_y = self.list_frame.winfo_pointery()
+
+        labels = [
+            widget for widget in self.list_frame.winfo_children()
+            if isinstance(widget, tk.Label)
+        ]
+
+        drop_index = self.drag_start_index
+
+        for index, label in enumerate(labels):
+            label_top = label.winfo_rooty()
+            label_bottom = label_top + label.winfo_height()
+
+            if label_top <= mouse_y <= label_bottom:
+                drop_index = index
+                break
+
+        if drop_index != self.drag_start_index:
+            moved_config = self.configs.pop(self.drag_start_index)
+            self.configs.insert(drop_index, moved_config)
+
+            self.save_new_order()
+
+        self.drag_start_index = None
+        self.drag_current_label = None
+
+        self.render_config_list()
+
+    def save_new_order(self):
+        try:
+            config_ids = [config["id"] for config in self.configs]
+            reorder_configs(config_ids)
+        except Exception as e:
+            messagebox.showerror("Reorder Error", str(e))
 
     def show_preview(self, config):
         self.preview_title.config(text=config.get("config_name", "Unnamed"))
@@ -173,27 +219,6 @@ class ConfigPage(tk.Frame):
             f"Last Name: {config.get('last_name', 'N/A')}",
             f"Full Name: {config.get('full_name', 'N/A')}",
         ])
-
-    def move_selected(self, direction):
-        if not self.selected_config:
-            messagebox.showerror("Selection Error", "Select a config first.")
-            return
-
-        try:
-            reorder_config(self.selected_config["id"], direction)
-
-            self.selected_config = None
-            self.selected_label = None
-
-            self.preview_title.config(text="Select a config")
-            self.preview_box.config(state="normal")
-            self.preview_box.delete("1.0", tk.END)
-            self.preview_box.config(state="disabled")
-
-            self.load_configs()
-
-        except Exception as e:
-            messagebox.showerror("Reorder Error", str(e))
 
     def use_selected_config(self):
         if not self.selected_config:

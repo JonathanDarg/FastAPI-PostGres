@@ -50,33 +50,15 @@ def get_configs(db: Session = Depends(get_db)):
 
 
 @router.post("/configs/reorder")
-def reorder_config(data: schemas.ReorderConfig, db: Session = Depends(get_db)):
-    current = db.query(models.SavedConfig).filter(
-        models.SavedConfig.id == data.config_id
-    ).first()
+def reorder_configs(config_ids: list[int], db: Session = Depends(get_db)):
+    for index, config_id in enumerate(config_ids):
+        config = db.query(models.SavedConfig).filter(
+            models.SavedConfig.id == config_id
+        ).first()
 
-    if not current:
-        raise HTTPException(status_code=404, detail="Config not found")
+        if config:
+            config.order_index = index
 
-    if data.direction == "up":
-        other = (
-            db.query(models.SavedConfig)
-            .filter(models.SavedConfig.order_index < current.order_index)
-            .order_by(models.SavedConfig.order_index.desc())
-            .first()
-        )
-    elif data.direction == "down":
-        other = (
-            db.query(models.SavedConfig)
-            .filter(models.SavedConfig.order_index > current.order_index)
-            .order_by(models.SavedConfig.order_index.asc())
-            .first()
-        )
-    else:
-        raise HTTPException(status_code=400, detail="Direction must be up or down")
-
-    if other:
-        current.order_index, other.order_index = other.order_index, current.order_index
-        db.commit()
+    db.commit()
 
     return {"status": "ok"}
